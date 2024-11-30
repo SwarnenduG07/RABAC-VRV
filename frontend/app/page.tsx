@@ -5,8 +5,7 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="">
-      hi tjee
+    <div className="bg-black h-screen">
       <SignupFormDemo />
     </div>
   );

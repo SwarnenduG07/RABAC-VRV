@@ -4,6 +4,13 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
 import axios from "axios";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 export default function SignupFormDemo() {
   const [formData, setState] = useState({
@@ -85,7 +92,7 @@ export default function SignupFormDemo() {
             />
           </LabelInputContainer>
           <LabelInputContainer>
-            <Label htmlFor="lastname">UserName</Label>
+            <Label htmlFor="lastname">Username</Label>
             <Input 
               id="lastname"
               name="username"
@@ -108,15 +115,20 @@ export default function SignupFormDemo() {
             type="password" 
           />
           <LabelInputContainer>
-            <Label htmlFor="lastname">ROLE</Label>
-            <Input 
-              id="lastname"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              placeholder="Durden" 
-              type="text" 
-            />
+            <Label htmlFor="role">Role</Label>
+            <Select
+              defaultValue={formData.role}
+              onValueChange={(value) => setState({ ...formData, role: value })}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="USER">User</SelectItem>
+                <SelectItem value="ADMIN">Admin</SelectItem>
+                <SelectItem value="MODERATOR">Moderator</SelectItem>
+              </SelectContent>
+            </Select>
           </LabelInputContainer>
         </LabelInputContainer>
         </div>
@@ -132,6 +144,9 @@ export default function SignupFormDemo() {
 
         <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
       </form>
+      <div>
+        Already have an account? <a  className="font-bold text-blue-700" href="/signin">Sign in</a>
+      </div>
     </div>
   );
 }
