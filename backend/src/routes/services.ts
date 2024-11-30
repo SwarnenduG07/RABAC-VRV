@@ -1,7 +1,5 @@
 import { Router, Request, Response } from "express";
 import { authenticateToken } from "../middleware/auth";
-import { checkPermission } from "../middleware/permissionAuth";
-import { Permission } from "../types/types";
 import { checkRole } from "../middleware/roleAuth";
 
 const router = Router();
