@@ -28,20 +28,33 @@ export default function ServicesPage() {
   const handleServiceClick = async (service: string) => {
     try {
       const token = localStorage.getItem('accessToken');
+      if (!token) {
+        setError('Please login first');
+        return;
+      }
+
       let data;
 
       switch (service) {
         case 'amenities':
-          data = {
-            title: "Available Amenities",
-            items: [
-              { name: "Swimming Pool", status: "Open", timing: "6 AM - 10 PM", maintenance: "Every Monday", temperature: "28°C", capacity: "50 people" },
-              { name: "Gym", status: "Open", timing: "24/7", lastCleaning: "2 hours ago", equipment: "Full Set", trainer: "Available" },
-              { name: "Tennis Court", status: "Maintenance", nextAvailable: "Tomorrow", courtType: "Hard Court", lights: "Available" },
-              { name: "Basketball Court", status: "Open", timing: "8 AM - 8 PM", maintenance: "Every Wednesday", lights: "Available" },
-              { name: "Sauna", status: "Closed", reopening: "5 PM", maxCapacity: "6 people", temperature: "85°C" }
-            ]
-          };
+          try {
+            const response = await axios.get('http://localhost:3001/api/v1/services/amenities', {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            data = formatResponseData(response.data, "Available Amenities");
+          } catch {
+            // Fallback to dummy data if API fails
+            data = {
+              title: "Available Amenities",
+              items: [
+                { name: "Swimming Pool", status: "Open", timing: "6 AM - 10 PM", maintenance: "Every Monday", temperature: "28°C", capacity: "50 people" },
+                { name: "Gym", status: "Open", timing: "24/7", lastCleaning: "2 hours ago", equipment: "Full Set", trainer: "Available" },
+                { name: "Tennis Court", status: "Maintenance", nextAvailable: "Tomorrow", courtType: "Hard Court", lights: "Available" },
+                { name: "Basketball Court", status: "Open", timing: "8 AM - 8 PM", maintenance: "Every Wednesday", lights: "Available" },
+                { name: "Sauna", status: "Closed", reopening: "5 PM", maxCapacity: "6 people", temperature: "85°C" }
+              ]
+            };
+          }
           break;
 
         case 'cctv':
@@ -49,16 +62,23 @@ export default function ServicesPage() {
             setError('Admin access required');
             return;
           }
-          data = {
-            title: "CCTV Monitoring",
-            items: [
-              { location: "Main Gate", status: "Active", lastCheck: "10 mins ago", resolution: "4K", recording: "Yes", motionDetection: "Enabled" },
-              { location: "Parking Level 1", status: "Active", lastCheck: "15 mins ago", coverage: "100%", nightVision: "Enabled", alerts: "None" },
-              { location: "Lobby", status: "Warning", issue: "Poor visibility", maintenance: "Scheduled", lastIncident: "None", coverage: "85%" },
-              { location: "Emergency Exit", status: "Active", lastCheck: "5 mins ago", batteryBackup: "Available", recording: "Yes" },
-              { location: "Elevator Area", status: "Active", lastCheck: "12 mins ago", resolution: "1080p", coverage: "100%" }
-            ]
-          };
+          try {
+            const response = await axios.get('http://localhost:3001/api/v1/services/cctv', {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            data = formatResponseData(response.data, "CCTV Monitoring");
+          } catch {
+            data = {
+              title: "CCTV Monitoring",
+              items: [
+                { location: "Main Gate", status: "Active", lastCheck: "10 mins ago", resolution: "4K", recording: "Yes", motionDetection: "Enabled" },
+                { location: "Parking Level 1", status: "Active", lastCheck: "15 mins ago", coverage: "100%", nightVision: "Enabled", alerts: "None" },
+                { location: "Lobby", status: "Warning", issue: "Poor visibility", maintenance: "Scheduled", lastIncident: "None", coverage: "85%" },
+                { location: "Emergency Exit", status: "Active", lastCheck: "5 mins ago", batteryBackup: "Available", recording: "Yes" },
+                { location: "Elevator Area", status: "Active", lastCheck: "12 mins ago", resolution: "1080p", coverage: "100%" }
+              ]
+            };
+          }
           break;
 
         case 'security':
@@ -66,16 +86,23 @@ export default function ServicesPage() {
             setError('Admin access required');
             return;
           }
-          data = {
-            title: "Security Logs",
-            items: [
-              { time: "10:45 AM", event: "Visitor Entry", location: "Main Gate", visitorName: "John Doe", purpose: "Meeting" },
-              { time: "11:30 AM", event: "Fire Alarm Test", location: "Building A", status: "Successful", technician: "Mike Ross" },
-              { time: "12:15 PM", event: "Maintenance Access", location: "Server Room", personnel: "Tech Team", duration: "45 mins" },
-              { time: "2:30 PM", event: "Suspicious Activity", location: "Parking B2", action: "Security Dispatched", resolved: "Yes" },
-              { time: "3:45 PM", event: "Delivery Arrival", location: "Loading Bay", vendor: "FastEx", verified: "Yes" }
-            ]
-          };
+          try {
+            const response = await axios.get('http://localhost:3001/api/v1/services/security-logs', {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            data = formatResponseData(response.data, "Security Logs");
+          } catch {
+            data = {
+              title: "Security Logs",
+              items: [
+                { time: "10:45 AM", event: "Visitor Entry", location: "Main Gate", visitorName: "John Doe", purpose: "Meeting" },
+                { time: "11:30 AM", event: "Fire Alarm Test", location: "Building A", status: "Successful", technician: "Mike Ross" },
+                { time: "12:15 PM", event: "Maintenance Access", location: "Server Room", personnel: "Tech Team", duration: "45 mins" },
+                { time: "2:30 PM", event: "Suspicious Activity", location: "Parking B2", action: "Security Dispatched", resolved: "Yes" },
+                { time: "3:45 PM", event: "Delivery Arrival", location: "Loading Bay", vendor: "FastEx", verified: "Yes" }
+              ]
+            };
+          }
           break;
 
         case 'electrical':
@@ -83,16 +110,23 @@ export default function ServicesPage() {
             setError('Moderator access required');
             return;
           }
-          data = {
-            title: "Electrical Panel Status",
-            items: [
-              { zone: "Block A Main", status: "Normal", consumption: "450 kW/h", voltage: "220V", lastMaintenance: "Last Week", efficiency: "95%" },
-              { zone: "Block B", status: "High Load", consumption: "750 kW/h", peakTime: "2 PM", alert: "Monitor Required", efficiency: "87%" },
-              { zone: "Emergency Backup", status: "Standby", lastTest: "Yesterday", capacity: "100%", runtime: "48 hours", type: "Diesel" },
-              { zone: "Solar Grid", status: "Active", generation: "125 kW/h", efficiency: "92%", panels: "100% Operational" },
-              { zone: "Common Areas", status: "Normal", consumption: "200 kW/h", peakHours: "6 PM - 8 PM", optimization: "Enabled" }
-            ]
-          };
+          try {
+            const response = await axios.get('http://localhost:3001/api/v1/services/electrical-panel', {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            data = formatResponseData(response.data, "Electrical Panel Status");
+          } catch {
+            data = {
+              title: "Electrical Panel Status",
+              items: [
+                { zone: "Block A Main", status: "Normal", consumption: "450 kW/h", voltage: "220V", lastMaintenance: "Last Week", efficiency: "95%" },
+                { zone: "Block B", status: "High Load", consumption: "750 kW/h", peakTime: "2 PM", alert: "Monitor Required", efficiency: "87%" },
+                { zone: "Emergency Backup", status: "Standby", lastTest: "Yesterday", capacity: "100%", runtime: "48 hours", type: "Diesel" },
+                { zone: "Solar Grid", status: "Active", generation: "125 kW/h", efficiency: "92%", panels: "100% Operational" },
+                { zone: "Common Areas", status: "Normal", consumption: "200 kW/h", peakHours: "6 PM - 8 PM", optimization: "Enabled" }
+              ]
+            };
+          }
           break;
 
         case 'maintenance':
@@ -100,29 +134,43 @@ export default function ServicesPage() {
             setError('Moderator access required');
             return;
           }
-          data = {
-            title: "Maintenance Schedule",
-            items: [
-              { task: "HVAC Service", date: "Tomorrow", assignee: "John Smith", priority: "High", duration: "4 hours", equipment: "Full Set" },
-              { task: "Generator Test", date: "Next Week", assignee: "Mike Wilson", type: "Routine", location: "All Blocks", duration: "2 hours" },
-              { task: "Fire Alarm Check", date: "03/20/2024", assignee: "Sarah Johnson", priority: "Critical", coverage: "All Floors" },
-              { task: "Plumbing Inspection", date: "03/25/2024", assignee: "Tom Davis", type: "Preventive", location: "Block A & B" },
-              { task: "Elevator Maintenance", date: "04/01/2024", assignee: "Tech Team", type: "Scheduled", vendor: "ElevatorCo" }
-            ]
-          };
+          try {
+            const response = await axios.get('http://localhost:3001/api/v1/services/maintenance-schedule', {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            data = formatResponseData(response.data, "Maintenance Schedule");
+          } catch {
+            data = {
+              title: "Maintenance Schedule",
+              items: [
+                { task: "HVAC Service", date: "Tomorrow", assignee: "John Smith", priority: "High", duration: "4 hours", equipment: "Full Set" },
+                { task: "Generator Test", date: "Next Week", assignee: "Mike Wilson", type: "Routine", location: "All Blocks", duration: "2 hours" },
+                { task: "Fire Alarm Check", date: "03/20/2024", assignee: "Sarah Johnson", priority: "Critical", coverage: "All Floors" },
+                { task: "Plumbing Inspection", date: "03/25/2024", assignee: "Tom Davis", type: "Preventive", location: "Block A & B" },
+                { task: "Elevator Maintenance", date: "04/01/2024", assignee: "Tech Team", type: "Scheduled", vendor: "ElevatorCo" }
+              ]
+            };
+          }
           break;
 
         case 'notices':
-          data = {
-            title: "Community Notices",
-            items: [
-              { title: "Monthly Meeting", date: "03/15/2024", time: "6 PM", location: "Community Hall", agenda: "Budget Discussion" },
-              { title: "Pool Maintenance", date: "03/18/2024", duration: "2 Days", alternative: "Guest Pool Available" },
-              { title: "New Security Measures", date: "Effective Immediately", details: "Updated Access Cards", contact: "Security Office" },
-              { title: "Community Event", date: "03/30/2024", event: "Spring Festival", location: "Garden Area", rsvp: "Required" },
-              { title: "Parking Updates", date: "04/01/2024", changes: "New Numbering System", implementation: "Phase-wise" }
-            ]
-          };
+          try {
+            const response = await axios.get('http://localhost:3001/api/v1/services/notices', {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            data = formatResponseData(response.data, "Community Notices");
+          } catch {
+            data = {
+              title: "Community Notices",
+              items: [
+                { title: "Monthly Meeting", date: "03/15/2024", time: "6 PM", location: "Community Hall", agenda: "Budget Discussion" },
+                { title: "Pool Maintenance", date: "03/18/2024", duration: "2 Days", alternative: "Guest Pool Available" },
+                { title: "New Security Measures", date: "Effective Immediately", details: "Updated Access Cards", contact: "Security Office" },
+                { title: "Community Event", date: "03/30/2024", event: "Spring Festival", location: "Garden Area", rsvp: "Required" },
+                { title: "Parking Updates", date: "04/01/2024", changes: "New Numbering System", implementation: "Phase-wise" }
+              ]
+            };
+          }
           break;
       }
 
