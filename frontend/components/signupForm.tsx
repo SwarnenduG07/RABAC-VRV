@@ -1,14 +1,46 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
+import axios from "axios";
 
 export default function SignupFormDemo() {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("Form submitted");
+  const [formData, setState] = useState({
+    firstname: "",
+    lastname: "",
+    email: "",
+    username: "",
+    password: "",
+    role: "USER"
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setState({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    try {
+      const response = await axios.post('http://localhost:3001/api/v1/user/register', formData);
+      console.log("Registration successful:", response.data);
+      // Redirect to login page after successful registration
+      window.location.href = '/signin';
+    } catch (error) {
+      if (error instanceof Error) {
+        const axiosError = error as any;
+        if (axiosError.response) {
+          console.error("Registration failed:", axiosError.response.data.message);
+          // TODO: Add toast or alert to show error message
+        }
+      }
+    }
+  };
+
   return (
     <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
       <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
@@ -19,30 +51,72 @@ export default function SignupFormDemo() {
         <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
           <LabelInputContainer>
             <Label htmlFor="firstname">First name</Label>
-            <Input id="firstname" placeholder="Tyler" type="text" />
+            <Input 
+              id="firstname"
+              name="firstname"
+              value={formData.firstname}
+              onChange={handleChange}
+              placeholder="Tyler" 
+              type="text" 
+            />
           </LabelInputContainer>
           <LabelInputContainer>
             <Label htmlFor="lastname">Last name</Label>
-            <Input id="lastname" placeholder="Durden" type="text" />
+            <Input 
+              id="lastname"
+              name="lastname"
+              value={formData.lastname}
+              onChange={handleChange}
+              placeholder="Durden" 
+              type="text" 
+            />
           </LabelInputContainer>
         </div>
         <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
           <LabelInputContainer>
             <Label htmlFor="firstname">Email address</Label>
-            <Input id="firstname" placeholder="Tyler" type="text" />
+            <Input 
+              id="firstname"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Tyler" 
+              type="text" 
+            />
           </LabelInputContainer>
           <LabelInputContainer>
             <Label htmlFor="lastname">UserName</Label>
-            <Input id="lastname" placeholder="Durden" type="text" />
+            <Input 
+              id="lastname"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="Durden" 
+              type="text" 
+            />
           </LabelInputContainer>
         </div>
          <div>
          <LabelInputContainer className="mb-4">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" placeholder="••••••••" type="password" />
+          <Input 
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="••••••••" 
+            type="password" 
+          />
           <LabelInputContainer>
             <Label htmlFor="lastname">ROLE</Label>
-            <Input id="lastname" placeholder="Durden" type="text" />
+            <Input 
+              id="lastname"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              placeholder="Durden" 
+              type="text" 
+            />
           </LabelInputContainer>
         </LabelInputContainer>
         </div>
