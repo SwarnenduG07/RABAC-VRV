@@ -22,12 +22,13 @@ export default function SigninFormDemo() {
     e.preventDefault();
      try {
       const response = await axios.post('http://localhost:3001/api/v1/user/login', formData);
-      // Store tokens in localStorage
-      localStorage.setItem('accessToken', (response.data as any).accessToken);
-      localStorage.setItem('refreshToken', (response.data as any).refreshToken);
+      // Store tokens and role in localStorage
+      localStorage.setItem('accessToken', response.data.accessToken);
+      localStorage.setItem('refreshToken', response.data.refreshToken);
+      localStorage.setItem('userRole', response.data.user.role);
       
       console.log("Login successful:", response.data);
-      window.location.href = '/';
+      window.location.href = '/services';
     } catch (error) {
         console.error("Request error:", error);
         if (error instanceof Error) {
