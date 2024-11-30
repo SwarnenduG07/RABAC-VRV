@@ -14,7 +14,7 @@ app.use("/api/v1/roles", rolesRouter);
 app.use("/api/v1/services", servicesRouter);
 
 
-app.listen(3000, () => {
-    console.log("Backend is running on port 3000");
+app.listen(3001, () => {
+    console.log("Backend is running on port 3001");
     
 })

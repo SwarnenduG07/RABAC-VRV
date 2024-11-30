@@ -85,56 +85,57 @@ router.post("/login", async (req: Request, res: Response) => {
     return res.status(400).json({ message: "Invalid Inputs" });
   }
 
-  const user = await prisma.user.findUnique({ 
-    where: {
-         email: parsedData.data.email
-       } 
+  try {
+    const user = await prisma.user.findFirst({
+      where: { email: parsedData.data.email },
     });
-  if (!user) {
-    return res.status(401).json({ message: "Invalid credentials" });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      parsedData.data.password,
+      user.password
+    );
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid password" });
+    }
+
+    const accessToken = jwt.sign(
+      { userId: user.id },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "15m" }
+    );
+
+    const refreshToken = jwt.sign(
+      { userId: user.id },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "7d" }
+    );
+
+    // Update user with refresh token
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken },
+    });
+
+    // Return user data along with tokens
+    return res.json({
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        username: user.username
+      }
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
-
-  const isPasswordValid = await bcrypt.compare(parsedData.data.password, user.password);
-  if (!isPasswordValid) {
-    return res.status(401).json({ message: "Invalid credentials" });
-  }
-
-  if (!user.isEmailVerified) {
-    return res.status(401).json({ message: "Please verify your email first" });
-  }
-
-  const userPermissions = await prisma.userPermission.findMany({
-    where: { userId: user.id },
-    include: { permission: true }
-  });
-
-  const accessToken = jwt.sign(
-    { 
-      userId: user.id, 
-      role: user.role,
-      permissions: userPermissions.map(up => up.permission.name)
-    },
-    JWT_SECRET,
-    { expiresIn: "15m" }
-  );
-
-  const refreshToken = jwt.sign(
-    { userId: user.id, role: user.role },
-    process.env.REFRESH_TOKEN_SECRET as string,
-    { expiresIn: "7d" }
-  );
-
-  // Update user with refresh token
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { refreshToken },
-  });
-
-  return res.status(200).json({
-    message: "Login successful",
-    accessToken,
-    refreshToken,
-  });
 });
 
 router.post("/verify-email", async (req: Request, res: Response) => {
@@ -290,13 +291,22 @@ router.post("/logout", authenticateToken, async (req: Request, res: Response) =>
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  
-  await prisma.user.update({
-    where: { id: userId },
-    data: { refreshToken: null },
-  });
+  try {
+    
+    await prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: null },
+    });
 
-  return res.status(200).json({ message: "Logged out successfully" });
+    
+    return res.status(200).json({ 
+      message: "Logged out successfully",
+      clearTokens: true
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
+    return res.status(500).json({ message: "Internal server error during logout" });
+  }
 });
 
 export const userRouter = router;
