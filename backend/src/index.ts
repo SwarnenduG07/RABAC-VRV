@@ -9,7 +9,7 @@ dotenv.config()
 const app = express();
 
 app.use(cors({
-  origin: process.env.ORIGIN as string,  
+  origin: process.env.ORIGIN || "https://rabac.vercel.app/",  
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true

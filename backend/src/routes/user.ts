@@ -3,32 +3,31 @@ import { signinSchema, signupSchima } from "../types/types";
 import prisma from "../database/db";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-// import nodemailer from "nodemailer";
+import nodemailer from "nodemailer";
 
 import jwt from "jsonwebtoken";
 import { authenticateToken } from "../middleware/auth";
-import { JWT_SECRET } from "../config";
 const router = Router();
 
 const generateToken = () =>  crypto.randomBytes(32).toString("hex");
 
-// const sendEmail = async (email: string, subject: string, html: string) => {
-//   const transporter = nodemailer.createTransport({
-//     host: process.env.SMTP_HOST,
-//     port: parseInt(process.env.SMTP_PORT || "587"),
-//     auth: {
-//       user: process.env.SMTP_USER,
-//       pass: process.env.SMTP_PASS,
-//     },
-//   });
+const sendEmail = async (email: string, subject: string, html: string) => {
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || "587"),
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
 
-//   await transporter.sendMail({
-//     from: process.env.SMTP_FROM,
-//     to: email,
-//     subject,
-//     html,
-//   });
-// };
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM,
+    to: email,
+    subject,
+    html,
+  });
+};
 
 
 router.post("/register", async (req: Request, res: Response) => {
@@ -45,15 +44,14 @@ router.post("/register", async (req: Request, res: Response) => {
     });
 
     if (userExists) {
-      return res.status(400).json({
-        message: "User already exists"
-      });
+      return res.status(400).json({ message: "User already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(parsedData.data.password, 10);
-    
-    // Allow setting role from request body, but default to USER if not provided
-    const role = parsedData.data.role || 'USER';
+    const role = parsedData.data.role || "USER";
+
+    const verificationToken = generateToken();
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
     const user = await prisma.user.create({
       data: {
@@ -62,20 +60,30 @@ router.post("/register", async (req: Request, res: Response) => {
         password: hashedPassword,
         firstname: parsedData.data.firstname,
         lastname: parsedData.data.lastname,
-        role: role,
-        isEmailVerified: true,
+        role,
+        isEmailVerified: false,
+        emailVerificationToken: verificationToken,
+        emailVerificationExpires: verificationExpires,
       },
     });
 
+    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+    await sendEmail(
+      user.email,
+      "Verify your email",
+      `<p>Please verify your email by clicking <a href="${verificationLink}">this link</a>.</p>`
+    );
+
     return res.status(201).json({
-      message: "User registered successfully",
-      role: user.role
+      message: "User registered successfully. Verification email sent.",
+      role: user.role,
     });
   } catch (error) {
     console.error("User registration error:", error);
     return res.status(500).json({ message: "Failed to register user" });
   }
 });
+
 
 router.post("/login", async (req: Request, res: Response) => {
   const body = req.body;
