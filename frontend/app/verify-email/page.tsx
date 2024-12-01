@@ -21,32 +21,34 @@ export default function VerifyEmailContent() {
       }
 
       try {
-        console.log('Verifying token:', token);
+        // Log environment variable for debugging
+        console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
         
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/verify-email/${token}`, {
+        // Ensure we have a valid API URL
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        if (!baseUrl) {
+          throw new Error('API URL is not configured');
+        }
+
+        // Construct the full URL
+        const apiUrl = `${baseUrl}/api/user/verify-email/${token}`;
+        console.log('Making request to:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         });
 
-        const contentType = response.headers.get('content-type');
-        let data;
-        
-        if (contentType && contentType.includes('application/json')) {
-          const text = await response.text();
-          console.log('Response text:', text);
-          
-          try {
-            data = text ? JSON.parse(text) : {};
-          } catch (parseError) {
-            console.error('JSON parse error:', parseError);
-            throw new Error('Invalid response format from server');
-          }
-        }
+        // Log response details for debugging
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
+        const data = await response.json();
+        
         if (!response.ok) {
-          throw new Error(data?.message || `Verification failed (Status: ${response.status})`);
+          throw new Error(data.message || `Verification failed (Status: ${response.status})`);
         }
 
         setStatus('success');
