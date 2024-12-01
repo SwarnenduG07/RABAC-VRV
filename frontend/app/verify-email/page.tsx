@@ -22,10 +22,10 @@ export default function VerifyEmailContent() {
 
       try {
         // Log environment variable for debugging
-        console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
+        console.log('API URL:', process.env.NEXT_PUBLIC_API_BASE_URL);
         
         // Ensure we have a valid API URL
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL|| '';
         if (!baseUrl) {
           throw new Error('API URL is not configured');
         }

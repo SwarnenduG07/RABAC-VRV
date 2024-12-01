@@ -23,7 +23,7 @@ export default function VerifyEmailContent() {
       try {
         console.log('Verifying token:', token);
         
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/verify-email/${token}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/verify-email/${token}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
