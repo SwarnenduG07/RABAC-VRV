@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import toast from 'react-hot-toast';
 
 
 export default function SignupFormDemo() {
@@ -36,14 +37,23 @@ export default function SignupFormDemo() {
     try {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/user/register`, formData);
       console.log("Registration successful:", response.data);
-      // Redirect to login page after successful registration
+      toast.success('Registration successful!');
       window.location.href = '/signin';
     } catch (error) {
       if (error instanceof Error) {
         const axiosError = error as any;
         if (axiosError.response) {
           console.error("Registration failed:", axiosError.response.data.message);
-          // TODO: Add toast or alert to show error message
+          
+          // Handle specific error cases
+          const errorMessage = axiosError.response.data.message;
+          if (errorMessage.includes('already exists')) {
+            toast.error('User already exists with this email or username');
+          } else if (errorMessage.includes('password')) {
+            toast.error('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character');
+          } else {
+            toast.error(errorMessage || 'Registration failed. Please try again.');
+          }
         }
       }
     }

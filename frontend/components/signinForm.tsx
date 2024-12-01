@@ -4,6 +4,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
 import axios from "axios";
+import toast from 'react-hot-toast';
 
 
 export default function SigninFormDemo() {
@@ -36,14 +37,15 @@ export default function SigninFormDemo() {
       localStorage.setItem('userRole', data.user.role);
       
       console.log("Login successful:", data);
+      toast.success('Login successful!');
       window.location.href = '/services';
     } catch (error) {
         console.error("Request error:", error);
         if (error instanceof Error) {
             const axiosError = error as any;
             if (axiosError.response) {
-              console.error("Login failed:", axiosError.response.data.message);
-              // TODO: Add toast or alert to show error message
+              const errorMessage = axiosError.response.data.message || 'Login failed. Please try again.';
+              toast.error(errorMessage);
             }
           }
     }

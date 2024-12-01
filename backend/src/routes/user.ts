@@ -7,6 +7,7 @@ import nodemailer from "nodemailer";
 
 import jwt from "jsonwebtoken";
 import { authenticateToken } from "../middleware/auth";
+import { JWT_SECRET } from "../config";
 const router = Router();
 
 const generateToken = () =>  crypto.randomBytes(32).toString("hex");
@@ -44,14 +45,15 @@ router.post("/register", async (req: Request, res: Response) => {
     });
 
     if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({
+        message: "User already exists"
+      });
     }
 
     const hashedPassword = await bcrypt.hash(parsedData.data.password, 10);
-    const role = parsedData.data.role || "USER";
-
-    const verificationToken = generateToken();
-    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    
+    // Allow setting role from request body, but default to USER if not provided
+    const role = parsedData.data.role || 'USER';
 
     const user = await prisma.user.create({
       data: {
@@ -60,30 +62,20 @@ router.post("/register", async (req: Request, res: Response) => {
         password: hashedPassword,
         firstname: parsedData.data.firstname,
         lastname: parsedData.data.lastname,
-        role,
-        isEmailVerified: false,
-        emailVerificationToken: verificationToken,
-        emailVerificationExpires: verificationExpires,
+        role: role,
+        isEmailVerified: true,
       },
     });
 
-    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
-    await sendEmail(
-      user.email,
-      "Verify your email",
-      `<p>Please verify your email by clicking <a href="${verificationLink}">this link</a>.</p>`
-    );
-
     return res.status(201).json({
-      message: "User registered successfully. Verification email sent.",
-      role: user.role,
+      message: "User registered successfully",
+      role: user.role
     });
   } catch (error) {
     console.error("User registration error:", error);
     return res.status(500).json({ message: "Failed to register user" });
   }
 });
-
 
 router.post("/login", async (req: Request, res: Response) => {
   const body = req.body;
@@ -146,31 +138,7 @@ router.post("/login", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/verify-email", async (req: Request, res: Response) => {
-  const { token } = req.body;
 
-  const user = await prisma.user.findFirst({
-    where: {
-      emailVerificationToken: token,
-      emailVerificationExpires: { gt: new Date() },
-    },
-  });
-
-  if (!user) {
-    return res.status(400).json({ message: "Invalid or expired verification token" });
-  }
-
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      isEmailVerified: true,
-      emailVerificationToken: null,
-      emailVerificationExpires: null,
-    },
-  });
-
-  return res.status(200).json({ message: "Email verified successfully" });
-});
 
 router.post("/forgot-password", async (req: Request, res: Response) => {
   const { email } = req.body;
@@ -191,14 +159,14 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
     },
   });
 
-//   const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-//   await sendEmail(
-//     email,
-//     "Reset your password",
-//     `Please click this link to reset your password: ${resetUrl}`
-//   );
+  const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+  await sendEmail(
+    email,
+    "Reset your password",
+    `Please click this link to reset your password: ${resetUrl}`
+  );
 
-//   return res.status(200).json({ message: "Password reset email sent" });
+  return res.status(200).json({ message: "Password reset email sent" });
 });
 
 router.post("/reset-password", async (req: Request, res: Response) => {
