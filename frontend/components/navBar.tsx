@@ -1,16 +1,37 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { Avatar } from '@/components/ui/avatar';
+import Link from 'next/link';
 
 import { User, Settings, LogOut, Key } from 'lucide-react';
 import ChangePasswordModal from '@/components/ChangePasswordModal';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 
+interface User {
+  email: string;
+  role: string;
+}
+
 export const NavBar = () => {
   const router = useRouter();
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        if (parsedUser && parsedUser.email && parsedUser.role) {
+          setUser(parsedUser as User);
+        }
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -51,8 +72,8 @@ export const NavBar = () => {
           <div className="flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger className="focus:outline-none">
-                <Avatar className="h-8 w-8 bg-neutral-700 hover:bg-neutral-600 cursor-pointer">
-                  <User className="h-4 w-4 text-white" />
+                <Avatar className="h-8 w-8 bg-neutral-700 hover:bg-zinc-800 cursor-pointer">
+                  <User className="h-8 w-8 text-red-500" />
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
@@ -60,6 +81,15 @@ export const NavBar = () => {
                   <Key className="mr-2 h-4 w-4" />
                   Change Password
                 </DropdownMenuItem>
+                
+                {user?.role === 'ADMIN' && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/roles" className="flex items-center">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Role Management
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600">
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout

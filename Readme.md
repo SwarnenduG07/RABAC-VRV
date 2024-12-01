@@ -1,61 +1,45 @@
-# RBAC (Role-Based Access Control) System
+# RBAC System (Role-Based Access Control) 
+## Live link: [Your Live Frontend Link](https://rabac.vercel.app/)
 
-A comprehensive backend system implementing role-based access control with TypeScript, Express, and Prisma. The system manages user authentication and authorization through a hierarchical permission structure.
+A robust backend system for implementing role-based access control using **TypeScript**, **Express**, and **Prisma**. This system ensures secure user authentication and authorization with a hierarchical permission structure.
 
-## Key Components Used
+---
+
+## 🚀 Key Features
 
 ### 1. Authentication System
-- **JWT (JSON Web Tokens)**
-  - Access tokens with 15-minute expiry
-  - Refresh tokens for extended sessions
+- **Token-Based Authentication**
+  - **JWT (JSON Web Tokens)**
+    - Access tokens (15-minute expiry)
+    - Refresh tokens for extended sessions
+    - Token blacklisting for secure logout
   - Secure token storage and validation
-  - Token blacklisting for logout
-
 - **Password Security**
-  - Bcrypt hashing with salt rounds
+  - **Bcrypt** hashing with salt rounds for enhanced security
   - Password strength validation
-  - Secure reset mechanism
-  - Rate limiting on auth endpoints
-
-- **Email System**
-  - Verification emails for new accounts
+  - Secure password reset mechanism
+  - Rate limiting on authentication endpoints
+- **Email Notifications**
+  - Account verification emails
   - Password reset notifications
-  - HTML email templates
-  - SMTP configuration with nodemailer
+  - HTML email templates with **Nodemailer**
 
 ### 2. Role Management
 - **Three-tier Role System**
-  - `ADMIN`
-    - Full system access
-    - User management capabilities
-    - System configuration access
-    - Analytics and logs access
-  
-  - `MODERATOR`
-    - Limited administrative access
-    - Content management
-    - User monitoring
-    - Report generation
-  
-  - `USER`
-    - Basic access rights
-    - Profile management
-    - Standard feature access
-
-- **Role Assignment Features**
-  - Dynamic role updates
-  - Role hierarchy enforcement
-  - Audit logging for role changes
+  - **ADMIN**: Full system access, user management, and analytics.
+  - **MODERATOR**: Content management and user monitoring.
+  - **USER**: Basic profile management and feature access.
+- **Dynamic Role Assignment**
+  - Role updates and hierarchy enforcement
   - Role-based route protection
+  - Audit logging for role changes
 
 ### 3. Permission System
-- **Granular Controls**
-  - Individual permission assignments
-  - Permission grouping
-  - Inheritance structure
-  - Override capabilities
-
-- **Permission Types**  ```typescript
+- **Granular Permissions**
+  - Individual and grouped permissions
+  - Permission inheritance and overrides
+- **Predefined Permissions**:
+  ```typescript
   enum Permission {
     READ_USERS = 'READ_USERS',
     WRITE_USERS = 'WRITE_USERS',
@@ -63,177 +47,138 @@ A comprehensive backend system implementing role-based access control with TypeS
     MANAGE_ROLES = 'MANAGE_ROLES',
     ACCESS_ADMIN_PANEL = 'ACCESS_ADMIN_PANEL',
     ACCESS_MODERATOR_PANEL = 'ACCESS_MODERATOR_PANEL'
-  }  ```
-
-### 4. Database Architecture
-- **PostgreSQL Schema**  ```prisma
-  model User {
-    id                     Int              @id @default(autoincrement())
-    username               String           @unique
-    email                  String           @unique
-    password              String    
-    firstname             String
-    lastname              String
-    role                   Role             @default(USER)
-    refreshToken          String?
-    emailVerificationToken String?
-    emailVerificationExpires DateTime?
-    isEmailVerified       Boolean          @default(false)
-    resetPasswordToken    String?
-    resetPasswordExpires  DateTime?
-    userPermissions       UserPermission[]
-    createdAt             DateTime         @default(now())
-    updatedAt             DateTime         @updatedAt
   }
 
-  model Permission {
-    id              Int              @id @default(autoincrement())
-    name            String           @unique
-    description     String?
-    userPermissions UserPermission[]
-  }
+### 4. Database Schema (PostgreSQL)
+```
+model User {
+  id                     Int              @id @default(autoincrement())
+  username               String           @unique
+  email                  String           @unique
+  password               String    
+  firstname              String
+  lastname               String
+  role                   Role             @default(USER)
+  refreshToken           String?
+  emailVerificationToken String?
+  emailVerificationExpires DateTime?
+  isEmailVerified        Boolean          @default(false)
+  resetPasswordToken     String?
+  resetPasswordExpires   DateTime?
+  userPermissions        UserPermission[]
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+}
 
-  model UserPermission {
-    id           Int        @id @default(autoincrement())
-    user         User       @relation(fields: [userId], references: [id])
-    userId       Int
-    permission   Permission @relation(fields: [permissionId], references: [id])
-    permissionId Int
-    createdAt    DateTime   @default(now())
+model Permission {
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
+  description     String?
+  userPermissions UserPermission[]
+}
 
-    @@unique([userId, permissionId])
-  }  ```
+model UserPermission {
+  id           Int        @id @default(autoincrement())
+  user         User       @relation(fields: [userId], references: [id])
+  userId       Int
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  permissionId Int
+  createdAt    DateTime   @default(now())
 
-### 5. API Structure
-- **Authentication Endpoints**  ```typescript
-  POST /api/v1/user/register
-  // Request body
-  {
-    "email": "user@example.com",
-    "username": "username",
-    "password": "SecurePass123!",
-    "firstname": "John",
-    "lastname": "Doe"
-  }
+  @@unique([userId, permissionId])
+}
 
-  POST /api/v1/user/login
-  // Request body
-  {
-    "email": "user@example.com",
-    "password": "SecurePass123!"
-  }  ```
+```
+### 5. API Endpoints
+```
+POST /api/v1/user/register
+POST /api/v1/user/login
+POST /api/v1/user/forgotpassword
+POST /api/v1/user/reset-password
+POST /api/v1/user/change-password
 
-- **Role Management Endpoints**  ```typescript
-  POST /api/v1/roles/assign
-  // Request body (Admin only)
-  {
-    "userId": 1,
-    "role": "MODERATOR"
-  }  ```
+```
+## Role Management
+```
+POST /api/v1/roles/assign
+// Admin-only endpoint
 
-### 6. Security Implementation
-- **CORS Configuration**  ```typescript
-  app.use(cors({
-    origin: "*",  
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-  }));  ```
+```
 
-- **Authentication Middleware**  ```typescript
-  export const authenticateToken = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
+### 6. Security Measures
+```
+app.use(cors({
+  origin: "*",  
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 
-    if (!token) {
-      return res.status(401).json({ message: "No token provided" });
-    }
-    // ... token verification logic
-  };  ```
+```
+### 8. Development Server
+```
+git clone https://github.com/SwarnenduG07/RABAC-VRC.git
+npm install           # Install dependencies
+npx prisma migrate dev # Run database migrations
+npx prisma generate    # Generate Prisma client
+npm run dev            # Start development server
+npm run build          # Build for production
 
-### 7. Error Handling
-- **Standardized Error Responses**  ```typescript
-  {
-    "status": "error",
-    "code": 400-500,
-    "message": "Detailed error message",
-    "details": {} // Optional additional information
-  }  ```
+```
+### Environment Variables
+```
+DATABASE_URL="postgresql://username:password@localhost:5432/dbname"
+JWT_SECRET="your-secret-key"
+SMTP_HOST="your-smtp-host"
+SMTP_PORT=587
+SMTP_USER="your-smtp-username"
+SMTP_PASS="your-smtp-password"
+SMTP_FROM="noreply@yourdomain.com"
 
-- **Common Error Types**
-  - Authentication failures
-  - Permission denials
-  - Input validation errors
-  - Database constraints
-  - Rate limiting errors
-
-### 8. Development Setup
-- **Environment Configuration**  ```env
-  DATABASE_URL="postgresql://username:password@localhost:5432/dbname"
-  JWT_SECRET="your-secret-key"
-  SMTP_HOST="your-smtp-host"
-  SMTP_PORT=587
-  SMTP_USER="your-smtp-username"
-  SMTP_PASS="your-smtp-password"
-  SMTP_FROM="noreply@yourdomain.com"  ```
-
-- **Development Commands**  ```bash
-  # Install dependencies
-  npm install
-
-  # Run database migrations
-  npx prisma migrate dev
-
-  # Generate Prisma client
-  npx prisma generate
-
-  # Start development server
-  npm run dev
-
-  # Build for production
-  npm run build  ```
-
+```
 ### 9. Testing
-- Unit tests for core functionality
-- Integration tests for API endpoints
-- Authentication flow testing
-- Permission validation testing
-- Error handling verification
-
+```
+   Postman 
+```
 ### 10. Deployment
-- **Vercel Configuration**  ```json
-  {
-    "version": 2,
-    "builds": [
-      {
-        "src": "dist/index.js",
-        "use": "@vercel/node"
-      }
-    ],
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "dist/index.js"
-      }
-    ]
-  }  ```
+```
+   Vercel
+```
+## Frontend Setup
 
-## Contributing Guidelines
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open Pull Request
+### Features
+- Built with **Next.js**
+- Role-based access control integrated with backend
+- Responsive design
+- API communication for data fetching and rendering
 
-## License
-This project is licensed under the ISC License.
+### Commands
+```bash
+npm install --legacy-peer-deps #install dependencies
+npm run dev   # Development server
+npm run build # Production build
+npm run lint  # Code linting
+```
 
-## Acknowledgments
-- Express.js team for the robust web framework
-- TypeScript for the better type safety
-- Prisma team for the excellent ORM
-- PostgreSQL for the reliable database system
+### Contributing
+1. **Fork the repository.**
+2. **Create a feature branch:**
+   ```bash
+   git checkout -b feature/AmazingFeature
+   ```
+3. **Commit your changes:**
+   ```bash
+   git commit -m "Add AmazingFeature"
+   ```
+4. **Push to the branch:**
+   ```bash
+   git push origin feature/AmazingFeature
+   ```
+5. **Open a Pull Request.**
+
+### Acknowledgments
+- **Express.js**: For the robust web framework.
+- **TypeScript**: For type safety.
+- **Prisma**: For the ORM.
+- **PostgreSQL**: For the database.
+

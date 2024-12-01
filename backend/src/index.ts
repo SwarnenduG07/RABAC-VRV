@@ -1,5 +1,4 @@
 require('dotenv').config()
-console.log(process.env.ORIGIN)
 import express from "express"
 import cors from "cors"
 import { userRouter } from "./routes/user";
