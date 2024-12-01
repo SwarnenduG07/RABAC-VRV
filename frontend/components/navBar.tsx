@@ -16,7 +16,7 @@ export const NavBar = () => {
         return;
       }
 
-      const response = await axios.post('http://localhost:3001/api/v1/user/logout', {}, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/user/logout`, {}, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

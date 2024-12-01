@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import Modal from '@/components/ui/modal';
 import { NavBar } from '@/components/navBar';
 
@@ -11,15 +10,7 @@ export default function ServicesPage() {
   const [selectedService, setSelectedService] = useState<string>('');
   const [modalData, setModalData] = useState<any>(null);
 
-  const formatResponseData = (responseData: any, title: string) => {
-    if (Array.isArray(responseData)) {
-      return { title, items: responseData };
-    }
-    if (responseData.items) {
-      return { ...responseData, title };
-    }
-    return { title, items: [responseData] };
-  };
+
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
@@ -28,9 +19,9 @@ export default function ServicesPage() {
 
   const handleServiceClick = async (service: string) => {
     try {
-      const token = localStorage.getItem('accessToken');
+    
       let data;
-
+      selectedService
       switch (service) {
         case 'amenities':
           data = {

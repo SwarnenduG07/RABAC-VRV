@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "./ui/select";
 
+
 export default function SignupFormDemo() {
   const [formData, setState] = useState({
     firstname: "",
@@ -33,7 +34,7 @@ export default function SignupFormDemo() {
     e.preventDefault();
     
     try {
-      const response = await axios.post('http://localhost:3001/api/v1/user/register', formData);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/user/register`, formData);
       console.log("Registration successful:", response.data);
       // Redirect to login page after successful registration
       window.location.href = '/signin';
