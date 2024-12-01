@@ -23,25 +23,18 @@ export default function VerifyEmailContent() {
       try {
         console.log('Verifying token:', token);
         
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/verify-email`, {
-          method: 'POST',
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/verify-email/${token}`, {
+          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ token }),
-          credentials: 'include',
         });
 
-        // Log the response status and headers
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-        // Check if the response has content before trying to parse JSON
         const contentType = response.headers.get('content-type');
         let data;
         
         if (contentType && contentType.includes('application/json')) {
-          const text = await response.text(); // Get the raw text first
+          const text = await response.text();
           console.log('Response text:', text);
           
           try {
