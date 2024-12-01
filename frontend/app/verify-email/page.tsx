@@ -21,7 +21,7 @@ export default function VerifyEmailContent() {
       }
 
       try {
-        console.log('API URL:', `${process.env.NEXT_PUBLIC_API_URL}/api/user/verify-email`);
+        console.log('Verifying token:', token);
         
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/verify-email`, {
           method: 'POST',
@@ -32,12 +32,30 @@ export default function VerifyEmailContent() {
           credentials: 'include',
         });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        // Log the response status and headers
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+        // Check if the response has content before trying to parse JSON
+        const contentType = response.headers.get('content-type');
+        let data;
+        
+        if (contentType && contentType.includes('application/json')) {
+          const text = await response.text(); // Get the raw text first
+          console.log('Response text:', text);
+          
+          try {
+            data = text ? JSON.parse(text) : {};
+          } catch (parseError) {
+            console.error('JSON parse error:', parseError);
+            throw new Error('Invalid response format from server');
+          }
         }
 
-        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data?.message || `Verification failed (Status: ${response.status})`);
+        }
+
         setStatus('success');
         setMessage('Email verified successfully!');
         setTimeout(() => {
@@ -47,9 +65,10 @@ export default function VerifyEmailContent() {
       } catch (error) {
         console.error('Verification error:', error);
         setStatus('error');
-        setMessage(error instanceof Error 
-          ? `Verification failed: ${error.message}`
-          : 'An error occurred during verification. Please try again or contact support.'
+        setMessage(
+          error instanceof Error 
+            ? `Verification failed: ${error.message}`
+            : 'An error occurred during verification. Please try again or contact support.'
         );
       }
     };
