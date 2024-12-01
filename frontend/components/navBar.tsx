@@ -2,6 +2,7 @@
 import React from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export const NavBar = () => {
   const router = useRouter();
@@ -48,6 +49,9 @@ export const NavBar = () => {
           >
             Logout
           </button>
+          <Link href="/forgotpassword" className="text-xl font-bold text-gray-300">
+            Forgot Password?
+          </Link>
         </div>
       </div>
     </nav>
