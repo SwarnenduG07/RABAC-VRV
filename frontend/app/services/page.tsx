@@ -3,12 +3,22 @@ import { useEffect, useState } from 'react';
 import Modal from '@/components/ui/modal';
 import { NavBar } from '@/components/navBar';
 
+// Add these interfaces near the top of the file
+interface ModalItem {
+  [key: string]: string | number | boolean;
+}
+
+interface ModalData {
+  title: string;
+  items: ModalItem[];
+}
+
 export default function ServicesPage() {
   const [userRole, setUserRole] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<string>('');
-  const [modalData, setModalData] = useState<any>(null);
+  const [modalData, setModalData] = useState<ModalData | null>(null);
 
 
 
@@ -19,9 +29,11 @@ export default function ServicesPage() {
 
   const handleServiceClick = async (service: string) => {
     try {
-    
-      let data;
-      selectedService
+      let data: ModalData = {
+        title: "",
+        items: []
+      };
+      
       switch (service) {
         case 'amenities':
           data = {
@@ -223,7 +235,7 @@ export default function ServicesPage() {
       >
         <div className="space-y-4">
           {modalData?.items && Array.isArray(modalData.items) ? (
-            modalData.items.map((item: any, index: number) => (
+            modalData.items.map((item: ModalItem, index: number) => (
               <div key={index} className="border-b dark:border-zinc-700 last:border-0 pb-3 last:pb-0">
                 {Object.entries(item).map(([key, value]) => (
                   <p key={key} className="text-sm">
