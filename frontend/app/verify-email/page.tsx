@@ -21,29 +21,36 @@ export default function VerifyEmailContent() {
       }
 
       try {
+        console.log('API URL:', `${process.env.NEXT_PUBLIC_API_URL}/api/user/verify-email`);
+        
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/verify-email`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ token }),
+          credentials: 'include',
         });
 
-        const data = await response.json();
-
-        if (response.ok) {
-          setStatus('success');
-          setMessage('Email verified successfully!');
-          setTimeout(() => {
-            router.push('/signin');
-          }, 3000);
-        } else {
-          setStatus('error');
-          setMessage(data.message || 'Verification failed');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         }
+
+        const data = await response.json();
+        setStatus('success');
+        setMessage('Email verified successfully!');
+        setTimeout(() => {
+          router.push('/signin');
+        }, 3000);
+
       } catch (error) {
+        console.error('Verification error:', error);
         setStatus('error');
-        setMessage('An error occurred during verification');
+        setMessage(error instanceof Error 
+          ? `Verification failed: ${error.message}`
+          : 'An error occurred during verification. Please try again or contact support.'
+        );
       }
     };
 
@@ -75,10 +82,18 @@ export default function VerifyEmailContent() {
           </p>
 
           {status === 'error' && (
-            <div className="mt-4">
+            <div className="mt-4 space-y-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Please try:
+              </p>
+              <ul className="text-sm text-gray-600 dark:text-gray-400 list-disc list-inside">
+                <li>Checking if the verification link is correct</li>
+                <li>Requesting a new verification email</li>
+                <li>Contacting support if the issue persists</li>
+              </ul>
               <Link 
                 href="/signin"
-                className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                className="block mt-4 text-sm text-blue-600 dark:text-blue-400 hover:underline"
               >
                 Return to Sign In
               </Link>
@@ -95,3 +110,4 @@ export default function VerifyEmailContent() {
     </div>
   );
 }
+
