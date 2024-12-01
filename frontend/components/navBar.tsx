@@ -1,11 +1,16 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { Avatar } from '@/components/ui/avatar';
+
+import { User, Settings, LogOut, Key } from 'lucide-react';
+import ChangePasswordModal from '@/components/ChangePasswordModal';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 
 export const NavBar = () => {
   const router = useRouter();
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -39,18 +44,36 @@ export const NavBar = () => {
   };
 
   return (
-    <nav className="border border-neutral-800 rounded-2xl flex items-center justify-between lg:mx-48 md:mx-24 mx-4 mt-4 px-4 py-2 backdrop-blur-sm bg-neutral-800/80">
-      <div className="container mx-auto flex justify-between items-center">
-        <div className="text-xl font-bold">RABAC </div>
-        <div className="flex gap-4">
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600  text-white px-4 py-2 rounded-xl transition-colors"
-          >
-            Logout
-          </button>
+    <>
+      <nav className="border border-neutral-800 rounded-2xl flex items-center justify-between lg:mx-4 md:mx-24 mx-4 px-3 py-1.5 backdrop-blur-sm bg-neutral-800/80">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="text-xl text-gray-200 font-bold">RABAC</div>
+          <div className="flex items-center gap-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="focus:outline-none">
+                <Avatar className="h-8 w-8 bg-neutral-700 hover:bg-neutral-600 cursor-pointer">
+                  <User className="h-4 w-4 text-white" />
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => setIsChangePasswordOpen(true)}>
+                  <Key className="mr-2 h-4 w-4" />
+                  Change Password
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      <ChangePasswordModal 
+        isOpen={isChangePasswordOpen} 
+        onClose={() => setIsChangePasswordOpen(false)} 
+      />
+    </>
   );
 };

@@ -199,7 +199,7 @@ router.post("/reset-password", async (req: Request, res: Response) => {
 
 router.post("/change-password", authenticateToken, async (req: Request, res: Response) => {
   const { currentPassword, newPassword } = req.body;
-  const userId = req.user?.id; // Assuming you have authentication middleware
+  const userId = req.user?.id; 
 
   if (!userId) {
     return res.status(401).json({ message: "Unauthorized" });
