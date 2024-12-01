@@ -1,10 +1,11 @@
+require('dotenv').config()
+console.log(process.env.ORIGIN)
 import express from "express"
 import cors from "cors"
-import dotenv from "dotenv"
 import { userRouter } from "./routes/user";
 import { rolesRouter } from "./routes/roles";
 import { servicesRouter } from "./routes/services";
-dotenv.config()
+
 
 const app = express();
 

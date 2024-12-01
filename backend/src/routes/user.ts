@@ -7,7 +7,7 @@ import nodemailer from "nodemailer";
 
 import jwt from "jsonwebtoken";
 import { authenticateToken } from "../middleware/auth";
-import { JWT_SECRET } from "../config";
+
 const router = Router();
 
 const generateToken = () =>  crypto.randomBytes(32).toString("hex");

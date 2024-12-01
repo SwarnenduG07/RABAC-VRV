@@ -5,6 +5,7 @@ import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
 import axios from "axios";
 import toast from 'react-hot-toast';
+import Link from "next/link";
 
 
 export default function SigninFormDemo() {
@@ -96,8 +97,9 @@ export default function SigninFormDemo() {
 
         <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
       </form>
-      <div>
+      <div className="space-x-6">
         Did't have an account? <a  className="font-bold text-blue-700" href="/">Sign Up</a>
+        <a  className="font-bold text-blue-700" href="/forgotpassword">Forgot Passowrd?</a>
       </div>
     </div>
   );

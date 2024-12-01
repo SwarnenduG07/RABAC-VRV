@@ -49,9 +49,6 @@ export const NavBar = () => {
           >
             Logout
           </button>
-          <Link href="/forgotpassword" className="text-xl font-bold text-gray-300">
-            Forgot Password?
-          </Link>
         </div>
       </div>
     </nav>
