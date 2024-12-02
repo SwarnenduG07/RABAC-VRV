@@ -1,6 +1,7 @@
 # RBAC System (Role-Based Access Control) 
 ## Live link: [Your Live Frontend Link](https://rabac.vercel.app/)
 
+
 A robust backend system for implementing role-based access control using **TypeScript**, **Express**, and **Prisma**. This system ensures secure user authentication and authorization with a hierarchical permission structure.
 
 ---
